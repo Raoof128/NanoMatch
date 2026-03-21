@@ -8,8 +8,10 @@ on:
 
 jobs:
   build-and-test:
+    name: ${{ matrix.compiler }} / ${{ matrix.build_type }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         build_type: [Debug, Release]
         compiler: [g++, clang++]
@@ -46,9 +48,98 @@ jobs:
         run: cd build && ctest --output-on-failure
 
       - name: Run throughput benchmark
-        if: matrix.build_type == 'Release'
+        if: matrix.build_type == 'Release' && matrix.compiler == 'g++'
         run: ./build/bench/bench_throughput
 
       - name: Run latency benchmark
-        if: matrix.build_type == 'Release'
+        if: matrix.build_type == 'Release' && matrix.compiler == 'g++'
         run: ./build/bench/bench_latency
+
+      - name: Run memory benchmark
+        if: matrix.build_type == 'Release' && matrix.compiler == 'g++'
+        run: ./build/bench/bench_memory
+
+  sanitizers:
+    name: Sanitizers
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitizer: [address, undefined]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake libgtest-dev
+
+      - name: Build Google Test
+        run: |
+          cd /usr/src/gtest
+          sudo cmake .
+          sudo make
+          sudo cp lib/*.a /usr/lib/ 2>/dev/null || sudo cp *.a /usr/lib/ 2>/dev/null || true
+
+      - name: Configure with sanitizer
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_CXX_FLAGS="-fsanitize=${{ matrix.sanitizer }} -fno-omit-frame-pointer" \
+            -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=${{ matrix.sanitizer }}" \
+            -DBUILD_TESTING=ON \
+            -DBUILD_BENCH=OFF
+
+      - name: Build
+        run: cmake --build build -j$(nproc)
+
+      - name: Run tests under sanitizer
+        run: cd build && ctest --output-on-failure
+
+  format-check:
+    name: Format Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format
+
+      - name: Check formatting
+        run: |
+          find include/ src/ tests/ bench/ -name '*.cpp' -o -name '*.hpp' | \
+            xargs clang-format --dry-run --Werror 2>&1 || \
+            (echo "::error::Code formatting issues found. Run 'clang-format -i' on the files above." && exit 1)
+
+  static-analysis:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake libgtest-dev cppcheck
+
+      - name: Build Google Test
+        run: |
+          cd /usr/src/gtest
+          sudo cmake .
+          sudo make
+          sudo cp lib/*.a /usr/lib/ 2>/dev/null || sudo cp *.a /usr/lib/ 2>/dev/null || true
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_TESTING=ON -DBUILD_BENCH=ON
+
+      - name: Run cppcheck
+        run: |
+          cppcheck --enable=warning,style,performance,portability \
+            --suppress=missingIncludeSystem \
+            --error-exitcode=1 \
+            --inline-suppr \
+            -I include/ \
+            src/ include/

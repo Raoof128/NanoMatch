@@ -6,7 +6,9 @@
 
 namespace nm {
 
-// Template on comparator: std::greater for bids, std::less for asks
+/// One side of the order book (bid or ask), ordered by price.
+/// Templated on comparator: std::greater for bids (highest first),
+/// std::less for asks (lowest first).
 template <typename Compare = std::less<Price>>
 class BookSide {
 public:
@@ -15,17 +17,18 @@ public:
 
     [[nodiscard]] bool empty() const { return levels_.empty(); }
 
-    // Best price level (front of sorted map)
+    /// Returns the best price on this side, or nullopt if empty
     [[nodiscard]] std::optional<Price> best_price() const {
         if (levels_.empty()) return std::nullopt;
         return levels_.begin()->first;
     }
 
+    /// Returns a reference to the best (front) price level
     [[nodiscard]] PriceLevel& best_level() {
         return levels_.begin()->second;
     }
 
-    // Add order to appropriate price level
+    /// Add an order to the appropriate price level (creates level if needed)
     PriceLevel::OrderIterator add_order(Order order) {
         Price p = order.price;
         // Create price level if it doesn't exist
@@ -33,7 +36,7 @@ public:
         return it->second.add_order(std::move(order));
     }
 
-    // Remove order from specific price level
+    /// Remove an order from a specific price level; cleans up empty levels
     void remove_order(Price price, PriceLevel::OrderIterator order_it) {
         auto level_it = levels_.find(price);
         if (level_it == levels_.end()) return;
@@ -46,7 +49,7 @@ public:
         }
     }
 
-    // Check if incoming price crosses best price on this side
+    /// Check if an incoming price crosses the best price on this side
     [[nodiscard]] bool crosses(Price incoming_price, Side incoming_side) const {
         if (levels_.empty()) return false;
         Price best = levels_.begin()->first;
@@ -57,7 +60,7 @@ public:
         }
     }
 
-    // Remove empty price level by price
+    /// Remove a price level if it has no orders remaining
     void remove_level_if_empty(Price price) {
         auto level_it = levels_.find(price);
         if (level_it != levels_.end() && level_it->second.empty()) {
@@ -65,7 +68,6 @@ public:
         }
     }
 
-    // Get number of price levels
     [[nodiscard]] size_t level_count() const { return levels_.size(); }
 
     // Iterate levels for display

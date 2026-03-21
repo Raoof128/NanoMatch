@@ -5,9 +5,11 @@
 
 namespace nm {
 
+/// Top-level matching engine that routes order requests to per-symbol OrderBooks.
+/// Automatically creates a new book when a previously unseen symbol is encountered.
 class MatchingEngine {
 public:
-    // Process an incoming order request
+    /// Process an incoming order request for the given symbol. Returns any resulting trades.
     std::vector<Trade> process(const std::string& symbol,
                                 OrderRequest request) {
         // Auto-create book if new symbol
@@ -44,7 +46,7 @@ public:
         return {};
     }
 
-    // Access a specific book
+    /// Access a specific order book by symbol, or nullptr if not found
     OrderBook* get_book(const std::string& symbol) {
         auto it = books_.find(symbol);
         return (it != books_.end()) ? &it->second : nullptr;

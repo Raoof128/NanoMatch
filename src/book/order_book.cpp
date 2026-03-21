@@ -167,17 +167,18 @@ std::vector<Trade> OrderBook::modify_order(OrderID id, Price new_price,
     auto it = order_lookup_.find(id);
     if (it == order_lookup_.end()) return {};
 
-    // Save order details
+    // Save order details before cancellation invalidates the iterator
     Side side = it->second.side;
+    OrderType type = it->second.iterator->type;
 
     // Cancel existing
     cancel_order(id);
 
-    // Re-add with new price/quantity (keeps same ID)
+    // Re-add with new price/quantity (keeps same ID and original type)
     Order new_order;
     new_order.id                = id;
     new_order.side              = side;
-    new_order.type              = OrderType::Limit;
+    new_order.type              = type;
     new_order.price             = new_price;
     new_order.initial_quantity  = new_qty;
     new_order.remaining_quantity = new_qty;

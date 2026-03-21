@@ -4,6 +4,8 @@
 
 namespace nm {
 
+/// A single price level in the order book, holding a FIFO queue of orders
+/// at the same price. Supports O(1) insert and removal via std::list.
 class PriceLevel {
 public:
     explicit PriceLevel(Price price) : price_(price), total_quantity_(0) {}
@@ -13,27 +15,28 @@ public:
     [[nodiscard]] size_t   order_count()    const { return orders_.size(); }
     [[nodiscard]] bool     empty()          const { return orders_.empty(); }
 
-    // Iterator type for external reference (used by order lookup map)
-    using OrderIterator = std::list<Order>::iterator;
+    /// Iterator type for external reference (used by order lookup map)
+    using OrderIterator      = std::list<Order>::iterator;
+    using ConstOrderIterator = std::list<Order>::const_iterator;
 
-    // Add order to back of queue (FIFO)
+    /// Add order to back of queue (FIFO), returns iterator to the new order
     OrderIterator add_order(Order order) {
         total_quantity_ += order.remaining_quantity;
         orders_.push_back(std::move(order));
         return std::prev(orders_.end());
     }
 
-    // Remove order by iterator (O(1) for doubly-linked list)
+    /// Remove order by iterator (O(1) for doubly-linked list)
     void remove_order(OrderIterator it) {
         total_quantity_ -= it->remaining_quantity;
         orders_.erase(it);
     }
 
-    // Get front order (best time priority)
+    /// Get front order (best time priority)
     [[nodiscard]] Order& front() { return orders_.front(); }
     [[nodiscard]] const Order& front() const { return orders_.front(); }
 
-    // Fill front order partially
+    /// Fill front order partially, removing it if fully filled
     Quantity fill_front(Quantity qty) {
         auto& front_order = orders_.front();
         Quantity fill_qty = std::min(qty, front_order.remaining_quantity);
@@ -49,8 +52,12 @@ public:
     }
 
     // Iterators for traversal
-    auto begin() { return orders_.begin(); }
-    auto end()   { return orders_.end(); }
+    auto begin()        { return orders_.begin(); }
+    auto end()          { return orders_.end(); }
+    auto begin()  const { return orders_.begin(); }
+    auto end()    const { return orders_.end(); }
+    auto cbegin() const { return orders_.cbegin(); }
+    auto cend()   const { return orders_.cend(); }
 
 private:
     Price           price_;

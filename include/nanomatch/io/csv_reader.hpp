@@ -23,9 +23,11 @@ public:
         // Skip header
         std::getline(file, line);
 
+        size_t line_number = 1; // header was line 1
         while (std::getline(file, line)) {
+            ++line_number;
             if (line.empty()) continue;
-            auto req = parse_line(line);
+            auto req = parse_line(line, line_number);
             orders.push_back(req);
         }
 
@@ -33,7 +35,7 @@ public:
     }
 
 private:
-    static OrderRequest parse_line(const std::string& line) {
+    static OrderRequest parse_line(const std::string& line, size_t line_number) {
         std::istringstream ss(line);
         std::string token;
         OrderRequest req{};
@@ -44,8 +46,13 @@ private:
         else if (token == "CANCEL") req.action = OrderRequest::Action::Cancel;
         else if (token == "MODIFY") req.action = OrderRequest::Action::Modify;
 
-        std::getline(ss, token, ',');
-        req.id = std::stoull(token);
+        try {
+            std::getline(ss, token, ',');
+            req.id = std::stoull(token);
+        } catch (const std::exception&) {
+            throw std::runtime_error("Line " + std::to_string(line_number) +
+                ": invalid order ID '" + token + "'");
+        }
 
         std::getline(ss, token, ',');
         req.side = (token == "BUY") ? Side::Buy : Side::Sell;
@@ -56,11 +63,21 @@ private:
         else if (token == "IOC") req.type = OrderType::ImmediateOrCancel;
         else if (token == "FOK") req.type = OrderType::FillOrKill;
 
-        std::getline(ss, token, ',');
-        req.price = static_cast<Price>(std::stol(token));
+        try {
+            std::getline(ss, token, ',');
+            req.price = static_cast<Price>(std::stol(token));
+        } catch (const std::exception&) {
+            throw std::runtime_error("Line " + std::to_string(line_number) +
+                ": invalid price '" + token + "'");
+        }
 
-        std::getline(ss, token, ',');
-        req.quantity = static_cast<Quantity>(std::stoul(token));
+        try {
+            std::getline(ss, token, ',');
+            req.quantity = static_cast<Quantity>(std::stoul(token));
+        } catch (const std::exception&) {
+            throw std::runtime_error("Line " + std::to_string(line_number) +
+                ": invalid quantity '" + token + "'");
+        }
 
         return req;
     }

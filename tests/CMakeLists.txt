@@ -12,6 +12,13 @@ set(TEST_SOURCES
     test_cancel_modify.cpp
     test_edge_cases.cpp
     test_pool_allocator.cpp
+    test_csv_reader.cpp
+    test_csv_writer.cpp
+    test_order_generator.cpp
+    test_latency_stats.cpp
+    test_throughput_stats.cpp
+    test_order_validator.cpp
+    test_matching_engine.cpp
 )
 
 foreach(test_src ${TEST_SOURCES})

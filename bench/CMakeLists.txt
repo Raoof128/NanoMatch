@@ -1,0 +1,8 @@
+add_executable(bench_throughput bench_throughput.cpp)
+target_link_libraries(bench_throughput PRIVATE nanomatch_lib)
+
+add_executable(bench_latency bench_latency.cpp)
+target_link_libraries(bench_latency PRIVATE nanomatch_lib)
+
+add_executable(bench_memory bench_memory.cpp)
+target_link_libraries(bench_memory PRIVATE nanomatch_lib)

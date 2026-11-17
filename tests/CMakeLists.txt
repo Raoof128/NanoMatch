@@ -19,6 +19,8 @@ set(TEST_SOURCES
     test_throughput_stats.cpp
     test_order_validator.cpp
     test_matching_engine.cpp
+    test_regressions.cpp
+    test_invariants.cpp
 )
 
 foreach(test_src ${TEST_SOURCES})

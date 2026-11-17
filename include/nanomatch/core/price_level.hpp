@@ -1,6 +1,7 @@
 #pragma once
 #include "nanomatch/core/order.hpp"
 
+#include <iterator>
 #include <list>
 
 namespace nm {
@@ -14,7 +15,7 @@ public:
     [[nodiscard]] Price price() const {
         return price_;
     }
-    [[nodiscard]] Quantity total_quantity() const {
+    [[nodiscard]] TotalQuantity total_quantity() const {
         return total_quantity_;
     }
     [[nodiscard]] size_t order_count() const {
@@ -39,6 +40,19 @@ public:
     void remove_order(OrderIterator it) {
         total_quantity_ -= it->remaining_quantity;
         orders_.erase(it);
+    }
+
+    /// Lower an order's remaining quantity in place. The order keeps its position in the
+    /// queue. `new_remaining` must be greater than zero and no more than the current
+    /// remaining quantity; anything else is ignored and reported as false.
+    bool reduce_order(OrderIterator it, Quantity new_remaining) {
+        if (new_remaining == 0 || new_remaining > it->remaining_quantity)
+            return false;
+        const Quantity delta = it->remaining_quantity - new_remaining;
+        it->remaining_quantity = new_remaining;
+        it->initial_quantity -= std::min(delta, it->initial_quantity);
+        total_quantity_ -= delta;
+        return true;
     }
 
     /// Get front order (best time priority)
@@ -86,7 +100,7 @@ public:
 
 private:
     Price price_;
-    Quantity total_quantity_;
+    TotalQuantity total_quantity_;
     std::list<Order> orders_;  // Doubly-linked list for O(1) insert/remove
 };
 

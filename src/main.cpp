@@ -3,6 +3,7 @@
 #include "nanomatch/io/csv_writer.hpp"
 #include "nanomatch/io/order_generator.hpp"
 
+#include <exception>
 #include <iostream>
 #include <string>
 
@@ -17,8 +18,21 @@ void print_usage() {
               << "  --help           Show this help\n";
 }
 
+int run(int argc, char* argv[]);
+
 // cppcheck-suppress constParameter ; main's signature is fixed by the standard
 int main(int argc, char* argv[]) {
+    try {
+        return run(argc, argv);
+    } catch (const std::exception& e) {
+        // A missing file, a malformed CSV row or a bad --generate count ends up here
+        std::cerr << "nanomatch: " << e.what() << "\n";
+        return 1;
+    }
+}
+
+// cppcheck-suppress constParameter ; mirrors main's signature
+int run(int argc, char* argv[]) {
     std::string symbol = "AAPL";
     std::string csv_file;
     uint32_t generate_count = 0;

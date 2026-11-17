@@ -3,6 +3,7 @@
 #include "nanomatch/core/side.hpp"
 #include "nanomatch/core/types.hpp"
 
+#include <algorithm>
 #include <chrono>
 
 namespace nm {

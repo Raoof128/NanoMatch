@@ -34,7 +34,7 @@ public:
         if (!computed_) {
             const_cast<LatencyStats*>(this)->compute();
         }
-        size_t idx = static_cast<size_t>(p / 100.0 * sorted_.size());
+        size_t idx = static_cast<size_t>(p / 100.0 * static_cast<double>(sorted_.size()));
         idx = std::min(idx, sorted_.size() - 1);
         return sorted_[idx];
     }
@@ -42,7 +42,7 @@ public:
     [[nodiscard]] double average() const {
         if (latencies_.empty())
             return 0.0;
-        return std::accumulate(latencies_.begin(), latencies_.end(), 0ULL) /
+        return static_cast<double>(std::accumulate(latencies_.begin(), latencies_.end(), 0ULL)) /
                static_cast<double>(latencies_.size());
     }
 

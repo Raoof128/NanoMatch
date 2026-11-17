@@ -54,6 +54,14 @@ public:
         }
     }
 
+    /// Lower a resting order's remaining quantity without moving it in its queue.
+    bool reduce_order(Price price, PriceLevel::OrderIterator order_it, Quantity new_remaining) {
+        auto level_it = levels_.find(price);
+        if (level_it == levels_.end())
+            return false;
+        return level_it->second.reduce_order(order_it, new_remaining);
+    }
+
     /// Check if an incoming price crosses the best price on this side
     [[nodiscard]] bool crosses(Price incoming_price, Side incoming_side) const {
         if (levels_.empty())

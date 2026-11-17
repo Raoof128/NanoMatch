@@ -24,20 +24,17 @@ public:
     }
 
     [[nodiscard]] double elapsed_seconds() const {
-        auto elapsed_us =
-            std::chrono::duration_cast<std::chrono::microseconds>(end_ - start_).count();
-        return elapsed_us / 1'000'000.0;
+        return std::chrono::duration<double>(end_ - start_).count();
     }
 
     [[nodiscard]] double ops_per_second() const {
         double elapsed = elapsed_seconds();
-        return (elapsed > 0) ? ops_ / elapsed : 0.0;
+        return (elapsed > 0) ? static_cast<double>(ops_) / elapsed : 0.0;
     }
 
     [[nodiscard]] double avg_latency_ns() const {
-        double elapsed_us =
-            std::chrono::duration_cast<std::chrono::microseconds>(end_ - start_).count();
-        return (ops_ > 0) ? (elapsed_us * 1000.0) / ops_ : 0.0;
+        const double elapsed_ns = std::chrono::duration<double, std::nano>(end_ - start_).count();
+        return (ops_ > 0) ? elapsed_ns / static_cast<double>(ops_) : 0.0;
     }
 
     [[nodiscard]] uint64_t total_ops() const {

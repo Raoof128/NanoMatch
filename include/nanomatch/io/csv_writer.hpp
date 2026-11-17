@@ -1,8 +1,9 @@
 #pragma once
 #include "nanomatch/core/trade.hpp"
+
+#include <fstream>
 #include <string>
 #include <vector>
-#include <fstream>
 
 namespace nm {
 
@@ -18,9 +19,7 @@ public:
 
         file << "buy_order_id,sell_order_id,price,quantity\n";
         for (const auto& trade : trades) {
-            file << trade.buy_order_id << ","
-                 << trade.sell_order_id << ","
-                 << trade.price << ","
+            file << trade.buy_order_id << "," << trade.sell_order_id << "," << trade.price << ","
                  << trade.quantity << "\n";
         }
     }
@@ -32,9 +31,7 @@ public:
         }
 
         for (const auto& trade : trades) {
-            file << trade.buy_order_id << ","
-                 << trade.sell_order_id << ","
-                 << trade.price << ","
+            file << trade.buy_order_id << "," << trade.sell_order_id << "," << trade.price << ","
                  << trade.quantity << "\n";
         }
     }
@@ -43,4 +40,4 @@ private:
     std::string filepath_;
 };
 
-} // namespace nm
+}  // namespace nm

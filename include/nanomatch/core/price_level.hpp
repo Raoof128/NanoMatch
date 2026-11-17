@@ -1,5 +1,6 @@
 #pragma once
 #include "nanomatch/core/order.hpp"
+
 #include <list>
 
 namespace nm {
@@ -10,13 +11,21 @@ class PriceLevel {
 public:
     explicit PriceLevel(Price price) : price_(price), total_quantity_(0) {}
 
-    [[nodiscard]] Price    price()          const { return price_; }
-    [[nodiscard]] Quantity total_quantity()  const { return total_quantity_; }
-    [[nodiscard]] size_t   order_count()    const { return orders_.size(); }
-    [[nodiscard]] bool     empty()          const { return orders_.empty(); }
+    [[nodiscard]] Price price() const {
+        return price_;
+    }
+    [[nodiscard]] Quantity total_quantity() const {
+        return total_quantity_;
+    }
+    [[nodiscard]] size_t order_count() const {
+        return orders_.size();
+    }
+    [[nodiscard]] bool empty() const {
+        return orders_.empty();
+    }
 
     /// Iterator type for external reference (used by order lookup map)
-    using OrderIterator      = std::list<Order>::iterator;
+    using OrderIterator = std::list<Order>::iterator;
     using ConstOrderIterator = std::list<Order>::const_iterator;
 
     /// Add order to back of queue (FIFO), returns iterator to the new order
@@ -33,8 +42,12 @@ public:
     }
 
     /// Get front order (best time priority)
-    [[nodiscard]] Order& front() { return orders_.front(); }
-    [[nodiscard]] const Order& front() const { return orders_.front(); }
+    [[nodiscard]] Order& front() {
+        return orders_.front();
+    }
+    [[nodiscard]] const Order& front() const {
+        return orders_.front();
+    }
 
     /// Fill front order partially, removing it if fully filled
     Quantity fill_front(Quantity qty) {
@@ -52,17 +65,29 @@ public:
     }
 
     // Iterators for traversal
-    auto begin()        { return orders_.begin(); }
-    auto end()          { return orders_.end(); }
-    auto begin()  const { return orders_.begin(); }
-    auto end()    const { return orders_.end(); }
-    auto cbegin() const { return orders_.cbegin(); }
-    auto cend()   const { return orders_.cend(); }
+    auto begin() {
+        return orders_.begin();
+    }
+    auto end() {
+        return orders_.end();
+    }
+    auto begin() const {
+        return orders_.begin();
+    }
+    auto end() const {
+        return orders_.end();
+    }
+    auto cbegin() const {
+        return orders_.cbegin();
+    }
+    auto cend() const {
+        return orders_.cend();
+    }
 
 private:
-    Price           price_;
-    Quantity        total_quantity_;
+    Price price_;
+    Quantity total_quantity_;
     std::list<Order> orders_;  // Doubly-linked list for O(1) insert/remove
 };
 
-} // namespace nm
+}  // namespace nm

@@ -1,5 +1,6 @@
-#include <gtest/gtest.h>
 #include "nanomatch/book/order_book.hpp"
+
+#include <gtest/gtest.h>
 
 using namespace nm;
 
@@ -10,11 +11,11 @@ protected:
 
     Order make_order(Side side, Price price, Quantity qty) {
         Order o;
-        o.id                = next_id++;
-        o.side              = side;
-        o.type              = OrderType::Limit;
-        o.price             = price;
-        o.initial_quantity  = qty;
+        o.id = next_id++;
+        o.side = side;
+        o.type = OrderType::Limit;
+        o.price = price;
+        o.initial_quantity = qty;
         o.remaining_quantity = qty;
         return o;
     }

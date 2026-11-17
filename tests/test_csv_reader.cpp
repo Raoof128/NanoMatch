@@ -1,7 +1,9 @@
-#include <gtest/gtest.h>
 #include "nanomatch/io/csv_reader.hpp"
-#include <fstream>
+
 #include <cstdio>
+#include <fstream>
+
+#include <gtest/gtest.h>
 
 using namespace nm;
 
@@ -10,11 +12,10 @@ protected:
     std::string tmp_path_;
 
     void SetUp() override {
-        tmp_path_ = "/tmp/nanomatch_test_csv_reader_" +
-                    std::to_string(::testing::UnitTest::GetInstance()
-                                       ->current_test_info()
-                                       ->line()) +
-                    ".csv";
+        tmp_path_ =
+            "/tmp/nanomatch_test_csv_reader_" +
+            std::to_string(::testing::UnitTest::GetInstance()->current_test_info()->line()) +
+            ".csv";
     }
 
     void TearDown() override {
@@ -28,11 +29,10 @@ protected:
 };
 
 TEST_F(CSVReaderTest, ReadValidCSVWithAllActionTypes) {
-    write_file(
-        "action,id,side,type,price,quantity\n"
-        "NEW,1,BUY,LIMIT,10050,100\n"
-        "CANCEL,2,SELL,LIMIT,9900,50\n"
-        "MODIFY,3,BUY,LIMIT,10100,200\n");
+    write_file("action,id,side,type,price,quantity\n"
+               "NEW,1,BUY,LIMIT,10050,100\n"
+               "CANCEL,2,SELL,LIMIT,9900,50\n"
+               "MODIFY,3,BUY,LIMIT,10100,200\n");
 
     CSVReader reader(tmp_path_);
     auto orders = reader.read_orders();
@@ -45,12 +45,11 @@ TEST_F(CSVReaderTest, ReadValidCSVWithAllActionTypes) {
 }
 
 TEST_F(CSVReaderTest, ParseAllOrderTypes) {
-    write_file(
-        "action,id,side,type,price,quantity\n"
-        "NEW,1,BUY,LIMIT,10000,100\n"
-        "NEW,2,BUY,MARKET,0,100\n"
-        "NEW,3,BUY,IOC,10000,100\n"
-        "NEW,4,BUY,FOK,10000,100\n");
+    write_file("action,id,side,type,price,quantity\n"
+               "NEW,1,BUY,LIMIT,10000,100\n"
+               "NEW,2,BUY,MARKET,0,100\n"
+               "NEW,3,BUY,IOC,10000,100\n"
+               "NEW,4,BUY,FOK,10000,100\n");
 
     CSVReader reader(tmp_path_);
     auto orders = reader.read_orders();
@@ -64,10 +63,9 @@ TEST_F(CSVReaderTest, ParseAllOrderTypes) {
 }
 
 TEST_F(CSVReaderTest, ParseBothSides) {
-    write_file(
-        "action,id,side,type,price,quantity\n"
-        "NEW,1,BUY,LIMIT,10000,100\n"
-        "NEW,2,SELL,LIMIT,10100,200\n");
+    write_file("action,id,side,type,price,quantity\n"
+               "NEW,1,BUY,LIMIT,10000,100\n"
+               "NEW,2,SELL,LIMIT,10100,200\n");
 
     CSVReader reader(tmp_path_);
     auto orders = reader.read_orders();
@@ -79,9 +77,8 @@ TEST_F(CSVReaderTest, ParseBothSides) {
 }
 
 TEST_F(CSVReaderTest, ParseFieldValuesCorrectly) {
-    write_file(
-        "action,id,side,type,price,quantity\n"
-        "NEW,42,SELL,LIMIT,9950,500\n");
+    write_file("action,id,side,type,price,quantity\n"
+               "NEW,42,SELL,LIMIT,9950,500\n");
 
     CSVReader reader(tmp_path_);
     auto orders = reader.read_orders();
@@ -110,12 +107,11 @@ TEST_F(CSVReaderTest, FileNotFoundThrowsException) {
 }
 
 TEST_F(CSVReaderTest, SkipsEmptyLines) {
-    write_file(
-        "action,id,side,type,price,quantity\n"
-        "\n"
-        "NEW,1,BUY,LIMIT,10000,100\n"
-        "\n"
-        "NEW,2,SELL,LIMIT,10100,200\n");
+    write_file("action,id,side,type,price,quantity\n"
+               "\n"
+               "NEW,1,BUY,LIMIT,10000,100\n"
+               "\n"
+               "NEW,2,SELL,LIMIT,10100,200\n");
 
     CSVReader reader(tmp_path_);
     auto orders = reader.read_orders();

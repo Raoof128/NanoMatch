@@ -1,5 +1,6 @@
 #pragma once
 #include "nanomatch/core/order.hpp"
+
 #include <string>
 
 namespace nm {
@@ -43,4 +44,4 @@ public:
     }
 };
 
-} // namespace nm
+}  // namespace nm

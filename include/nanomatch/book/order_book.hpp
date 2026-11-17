@@ -1,9 +1,10 @@
 #pragma once
 #include "nanomatch/book/book_side.hpp"
 #include "nanomatch/core/trade.hpp"
+
+#include <string>
 #include <unordered_map>
 #include <vector>
-#include <string>
 
 namespace nm {
 
@@ -27,22 +28,35 @@ public:
     // ── Query ──
 
     /// Returns the best (highest) bid price, or nullopt if no bids
-    [[nodiscard]] std::optional<Price> best_bid() const { return bids_.best_price(); }
+    [[nodiscard]] std::optional<Price> best_bid() const {
+        return bids_.best_price();
+    }
     /// Returns the best (lowest) ask price, or nullopt if no asks
-    [[nodiscard]] std::optional<Price> best_ask() const { return asks_.best_price(); }
+    [[nodiscard]] std::optional<Price> best_ask() const {
+        return asks_.best_price();
+    }
 
     /// Returns the bid-ask spread, or nullopt if either side is empty
     [[nodiscard]] std::optional<Price> spread() const {
         auto bid = best_bid();
         auto ask = best_ask();
-        if (bid && ask) return *ask - *bid;
+        if (bid && ask)
+            return *ask - *bid;
         return std::nullopt;
     }
 
-    [[nodiscard]] const std::string& symbol() const { return symbol_; }
-    [[nodiscard]] size_t bid_levels() const { return bids_.level_count(); }
-    [[nodiscard]] size_t ask_levels() const { return asks_.level_count(); }
-    [[nodiscard]] size_t total_orders() const { return order_lookup_.size(); }
+    [[nodiscard]] const std::string& symbol() const {
+        return symbol_;
+    }
+    [[nodiscard]] size_t bid_levels() const {
+        return bids_.level_count();
+    }
+    [[nodiscard]] size_t ask_levels() const {
+        return asks_.level_count();
+    }
+    [[nodiscard]] size_t total_orders() const {
+        return order_lookup_.size();
+    }
 
     /// Print the top N levels of the book to stdout
     void print_book(size_t depth = 5) const;
@@ -62,17 +76,17 @@ private:
     // ── Data ──
 
     std::string symbol_;
-    BidSide     bids_;
-    AskSide     asks_;
+    BidSide bids_;
+    AskSide asks_;
 
     // Fast lookup: OrderID → (price, side, iterator into price level's list)
     struct OrderLocation {
-        Price                     price;
-        Side                      side;
+        Price price;
+        Side side;
         PriceLevel::OrderIterator iterator;
     };
 
     std::unordered_map<OrderID, OrderLocation> order_lookup_;
 };
 
-} // namespace nm
+}  // namespace nm

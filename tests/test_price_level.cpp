@@ -1,5 +1,6 @@
-#include <gtest/gtest.h>
 #include "nanomatch/core/price_level.hpp"
+
+#include <gtest/gtest.h>
 
 using namespace nm;
 

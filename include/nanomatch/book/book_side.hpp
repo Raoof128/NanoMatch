@@ -1,7 +1,8 @@
 #pragma once
 #include "nanomatch/core/price_level.hpp"
-#include <map>
+
 #include <functional>
+#include <map>
 #include <optional>
 
 namespace nm {
@@ -12,14 +13,17 @@ namespace nm {
 template <typename Compare = std::less<Price>>
 class BookSide {
 public:
-    using LevelMap     = std::map<Price, PriceLevel, Compare>;
+    using LevelMap = std::map<Price, PriceLevel, Compare>;
     using LevelIterator = typename LevelMap::iterator;
 
-    [[nodiscard]] bool empty() const { return levels_.empty(); }
+    [[nodiscard]] bool empty() const {
+        return levels_.empty();
+    }
 
     /// Returns the best price on this side, or nullopt if empty
     [[nodiscard]] std::optional<Price> best_price() const {
-        if (levels_.empty()) return std::nullopt;
+        if (levels_.empty())
+            return std::nullopt;
         return levels_.begin()->first;
     }
 
@@ -39,7 +43,8 @@ public:
     /// Remove an order from a specific price level; cleans up empty levels
     void remove_order(Price price, PriceLevel::OrderIterator order_it) {
         auto level_it = levels_.find(price);
-        if (level_it == levels_.end()) return;
+        if (level_it == levels_.end())
+            return;
 
         level_it->second.remove_order(order_it);
 
@@ -51,7 +56,8 @@ public:
 
     /// Check if an incoming price crosses the best price on this side
     [[nodiscard]] bool crosses(Price incoming_price, Side incoming_side) const {
-        if (levels_.empty()) return false;
+        if (levels_.empty())
+            return false;
         Price best = levels_.begin()->first;
         if (incoming_side == Side::Buy) {
             return incoming_price >= best;  // buy crosses asks
@@ -68,13 +74,23 @@ public:
         }
     }
 
-    [[nodiscard]] size_t level_count() const { return levels_.size(); }
+    [[nodiscard]] size_t level_count() const {
+        return levels_.size();
+    }
 
     // Iterate levels for display
-    auto begin() { return levels_.begin(); }
-    auto end()   { return levels_.end(); }
-    auto begin() const { return levels_.begin(); }
-    auto end()   const { return levels_.end(); }
+    auto begin() {
+        return levels_.begin();
+    }
+    auto end() {
+        return levels_.end();
+    }
+    auto begin() const {
+        return levels_.begin();
+    }
+    auto end() const {
+        return levels_.end();
+    }
 
 private:
     LevelMap levels_;
@@ -84,4 +100,4 @@ private:
 using BidSide = BookSide<std::greater<Price>>;  // Highest price first
 using AskSide = BookSide<std::less<Price>>;     // Lowest price first
 
-} // namespace nm
+}  // namespace nm

@@ -1,5 +1,6 @@
-#include <gtest/gtest.h>
 #include "nanomatch/core/order.hpp"
+
+#include <gtest/gtest.h>
 
 using namespace nm;
 

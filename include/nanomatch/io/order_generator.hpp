@@ -1,5 +1,6 @@
 #pragma once
 #include "nanomatch/core/order.hpp"
+
 #include <random>
 #include <vector>
 
@@ -7,9 +8,7 @@ namespace nm {
 
 class OrderGenerator {
 public:
-    explicit OrderGenerator(uint32_t seed = 42,
-                            Price base_price = 10000,
-                            Price price_range = 200)
+    explicit OrderGenerator(uint32_t seed = 42, Price base_price = 10000, Price price_range = 200)
         : rng_(seed),
           side_dist_(0, 1),
           price_dist_(base_price - price_range, base_price + price_range),
@@ -54,4 +53,4 @@ private:
     OrderID next_id_;
 };
 
-} // namespace nm
+}  // namespace nm

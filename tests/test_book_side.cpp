@@ -1,5 +1,6 @@
-#include <gtest/gtest.h>
 #include "nanomatch/book/book_side.hpp"
+
+#include <gtest/gtest.h>
 
 using namespace nm;
 

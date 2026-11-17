@@ -1,7 +1,8 @@
 #pragma once
 #include "nanomatch/book/order_book.hpp"
-#include <unordered_map>
+
 #include <string>
+#include <unordered_map>
 
 namespace nm {
 
@@ -10,8 +11,7 @@ namespace nm {
 class MatchingEngine {
 public:
     /// Process an incoming order request for the given symbol. Returns any resulting trades.
-    std::vector<Trade> process(const std::string& symbol,
-                                OrderRequest request) {
+    std::vector<Trade> process(const std::string& symbol, OrderRequest request) {
         // Auto-create book if new symbol
         auto [it, _] = books_.try_emplace(symbol, symbol);
 
@@ -25,11 +25,11 @@ public:
         switch (request.action) {
             case OrderRequest::Action::New: {
                 Order order;
-                order.id                = request.id;
-                order.side              = request.side;
-                order.type              = request.type;
-                order.price             = request.price;
-                order.initial_quantity  = request.quantity;
+                order.id = request.id;
+                order.side = request.side;
+                order.type = request.type;
+                order.price = request.price;
+                order.initial_quantity = request.quantity;
                 order.remaining_quantity = request.quantity;
                 return it->second.add_order(std::move(order));
             }
@@ -39,8 +39,7 @@ public:
                 return {};
 
             case OrderRequest::Action::Modify:
-                return it->second.modify_order(
-                    request.id, request.price, request.quantity);
+                return it->second.modify_order(request.id, request.price, request.quantity);
         }
 
         return {};
@@ -52,11 +51,13 @@ public:
         return (it != books_.end()) ? &it->second : nullptr;
     }
 
-    [[nodiscard]] size_t book_count() const { return books_.size(); }
+    [[nodiscard]] size_t book_count() const {
+        return books_.size();
+    }
 
 private:
     std::unordered_map<std::string, OrderBook> books_;
     OrderID next_id_ = 1;
 };
 
-} // namespace nm
+}  // namespace nm

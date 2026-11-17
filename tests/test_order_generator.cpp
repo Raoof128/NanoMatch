@@ -1,6 +1,8 @@
-#include <gtest/gtest.h>
 #include "nanomatch/io/order_generator.hpp"
+
 #include <set>
+
+#include <gtest/gtest.h>
 
 using namespace nm;
 
@@ -30,8 +32,7 @@ TEST(OrderGeneratorTest, DifferentSeedsProduceDifferentOrders) {
     for (int i = 0; i < 50; ++i) {
         auto o1 = gen1.generate();
         auto o2 = gen2.generate();
-        if (o1.price != o2.price || o1.quantity != o2.quantity ||
-            o1.side != o2.side) {
+        if (o1.price != o2.price || o1.quantity != o2.quantity || o1.side != o2.side) {
             found_difference = true;
             break;
         }
@@ -111,7 +112,8 @@ TEST(OrderGeneratorTest, CancelOrdersReferenceEarlierIDs) {
     for (int i = 0; i < 500; ++i) {
         auto req = gen.generate();
         if (req.action == OrderRequest::Action::New) {
-            if (req.id > max_new_id) max_new_id = req.id;
+            if (req.id > max_new_id)
+                max_new_id = req.id;
         } else if (req.action == OrderRequest::Action::Cancel) {
             // Cancel IDs should reference earlier orders
             EXPECT_GT(req.id, 0u);

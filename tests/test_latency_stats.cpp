@@ -1,5 +1,6 @@
-#include <gtest/gtest.h>
 #include "nanomatch/stats/latency_stats.hpp"
+
+#include <gtest/gtest.h>
 
 using namespace nm;
 

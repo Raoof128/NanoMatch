@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- **README accuracy**: The pool allocator was described as removing heap allocation from the hot path. It is a standalone component that the order book does not use, and the README now says so. The benchmark note states what each figure covers (about 80% adds with cancel attempts that often miss; add-only latency including timer overhead) and that timings vary by machine. The test count is corrected from "60+" to 137.
+
 ### Fixed
 
 - **CI, Format Check**: Ran `clang-format` 18 with the repository `.clang-format` over `include/`, `src/`, `tests/` and `bench/`. Formatting only.
@@ -19,13 +23,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Order Types**: Limit, Market, Immediate-or-Cancel (IOC), Fill-or-Kill (FOK)
 - **Order Operations**: Add, cancel, and modify with O(1) lookup by order ID
 - **Order Book**: Dual-sided book using `std::map` (red-black tree) for price levels and `std::list` for FIFO order queues
-- **Pool Allocator**: Custom `PoolAllocator<T>` template for zero-allocation hot path, with bounds-checked deallocation
+- **Pool Allocator**: Custom `PoolAllocator<T>` template with bounds-checked deallocation (standalone; not yet used by the order book)
 - **Order Validator**: Input validation for order requests (price, quantity, ID checks)
 - **CSV I/O**: `CSVReader` for order input with line-level error reporting, `CSVWriter` for trade output
 - **Order Generator**: Deterministic random order generator with configurable seed, price range, and cancel rate
 - **Statistics**: `LatencyStats` (p50/p99/p99.9 percentiles with lazy sorting) and `ThroughputStats` (ops/second measurement)
 - **Benchmarks**: Throughput (5M ops), per-operation latency (1M ops with histogram CSV), and memory pool vs `new`/`delete` comparison
-- **Test Suite**: 18 test suites with 60+ Google Test cases covering all components
+- **Test Suite**: 18 test files with 137 Google Test cases covering all components
 - **CI/CD**: GitHub Actions pipeline with multi-compiler matrix (GCC/Clang), Debug/Release builds, AddressSanitizer, UndefinedBehaviorSanitizer, clang-format check, and cppcheck static analysis
 - **CLI**: Interactive demo mode, CSV file processing, random order generation with `--file`, `--generate`, `--symbol`, `--verbose` flags
 - **Documentation**: Architecture overview, order types reference, benchmarking guide, contributing guidelines, security policy, code of conduct

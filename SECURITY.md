@@ -1,55 +1,23 @@
 # Security Policy
 
+NanoMatch is a study project maintained by one person in spare time. It is a single-threaded library and command-line demo with no network surface.
+
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in NanoMatch, please report it responsibly.
+Please do not open a public issue for a security problem. Use GitHub's private vulnerability reporting instead:
 
-**Do not open a public GitHub issue for security vulnerabilities.**
+**[Report a vulnerability](https://github.com/Raoof128/NanoMatch/security/advisories/new)** (the "Report a vulnerability" button on the repository's Security tab)
 
-### How to Report
+Useful things to include: what the problem is, an input or sequence of calls that reproduces it, and a suggested fix if you have one.
 
-Email: **raouf.abedini@protonmail.com**
+Reports are read and answered as time allows; there is no guaranteed response time. Reporters are credited in the changelog unless they prefer otherwise.
 
-Include in your report:
-- Description of the vulnerability
-- Steps to reproduce
-- Potential impact
-- Suggested fix (if any)
+## Scope
 
-### Response Timeline
+In scope: memory-safety errors, crashes or hangs from malformed input (the CSV reader, command-line arguments), and undefined behaviour in the library (`include/`, `src/`).
 
-| Stage | Timeline |
-|-------|----------|
-| Acknowledgement | Within 48 hours |
-| Initial assessment | Within 7 days |
-| Fix development | Within 30 days |
-| Public disclosure | After fix is released |
-
-### Scope
-
-This policy covers:
-- The NanoMatch matching engine library (`include/`, `src/`)
-- Build system and CI/CD configuration
-- Test infrastructure
-
-Out of scope:
-- Third-party dependencies (report to their maintainers)
-- Benchmark results or performance characteristics
-
-### Responsible Disclosure
-
-We ask that you:
-- Give us reasonable time to address the issue before public disclosure
-- Do not exploit the vulnerability beyond what is necessary to demonstrate it
-- Do not access or modify data belonging to others
-
-We commit to:
-- Acknowledging your report promptly
-- Keeping you informed of our progress
-- Crediting you in the fix announcement (unless you prefer otherwise)
+Out of scope: benchmark results, and third-party dependencies (report those upstream).
 
 ## Supported Versions
 
-| Version | Supported |
-|---------|-----------|
-| 1.x     | Yes       |
+Only the current `main` branch is maintained.

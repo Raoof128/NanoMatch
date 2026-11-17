@@ -2,7 +2,7 @@
 
 ## Overview
 
-NanoMatch implements a price-time priority (FIFO) matching engine — the core component of every financial exchange. It receives orders, matches buyers with sellers at the best available price, and produces trade execution reports.
+NanoMatch implements a price-time priority (FIFO) matching engine, the textbook core of an exchange, as a study project. It receives orders, matches buyers with sellers at the best available price, and returns the resulting trades. It runs on one thread and has no networking, persistence or accounts.
 
 ## System Architecture
 
@@ -11,7 +11,7 @@ NanoMatch implements a price-time priority (FIFO) matching engine — the core c
 │                         NanoMatch                             │
 │                                                               │
 │  ┌───────────────┐                                            │
-│  │  Order Input   │  CSV file, stdin, or programmatic API      │
+│  │  Order Input   │  CSV file or programmatic API              │
 │  │  Gateway       │                                            │
 │  └───────┬───────┘                                            │
 │          │  OrderRequest                                      │
@@ -52,7 +52,7 @@ Each side of the book uses a **red-black tree** (`std::map`) keyed by price:
 - **BidSide** uses `std::greater<Price>` — highest price (best bid) at the front
 - **AskSide** uses `std::less<Price>` — lowest price (best ask) at the front
 
-This gives O(log M) insertion of new price levels and O(1) access to the best price.
+This gives O(log M) lookup and insertion of price levels and O(1) access to the best price.
 
 ### Order Queue: `std::list<Order>` per Price Level
 
@@ -63,24 +63,30 @@ At each price level, orders are stored in a **doubly-linked list** maintaining F
 
 ### Order Lookup: `std::unordered_map<OrderID, OrderLocation>`
 
-A hash map provides O(1) lookup for cancel and modify operations. Each entry stores the order's price, side, and an iterator into the linked list for direct removal.
+A hash map provides average O(1) lookup for cancel and modify operations, and is consulted on every add to turn away an ID that is already resting. Each entry stores the order's price, side, and an iterator into the linked list for direct removal.
 
 ### Complexity Summary
 
-| Operation | Time Complexity | Space | Notes |
-|-----------|----------------|-------|-------|
-| Add order (new price level) | O(log M) | O(1) | M = number of price levels |
-| Add order (existing level) | O(1) | O(1) | Append to linked list |
-| Cancel order by ID | O(1) | — | Hash lookup + list erase |
-| Match at best price | O(1) | — | Front of best level's queue |
-| Get best bid/ask | O(1) | — | Map begin() iterator |
-| Fill-or-Kill check | O(M) | O(1) | Must scan levels to verify quantity |
-| Print book (top N) | O(N) | O(N) | Display only |
+| Operation | Time Complexity | Notes |
+|-----------|----------------|-------|
+| Add order that rests | O(log M) | Find or create the price level in the tree (M = price levels on that side), append to its list, insert into the hash map |
+| Cancel order by ID | O(1) average | Hash lookup and list erase; O(log M) more if the level empties and is removed |
+| Match one resting order | O(1) | Front of the best level's queue; O(log M) more when a level empties |
+| Get best bid/ask | O(1) | Map `begin()` |
+| Fill-or-Kill check | O(L) | L = crossable price levels; uses each level's stored total |
+| Modify, lower quantity at same price | O(1) average | In place |
+| Modify, otherwise | cancel + add | |
+| `check_invariants` | O(N) | N = resting orders; for tests |
+
+Every node of the tree, the lists and the hash map is a separate heap allocation, so the constants are those of pointer-chasing containers.
 
 ## Matching Algorithm
 
 ```
 incoming order arrives
+    │
+    ├── reject if the ID is 0 or already resting, the quantity is 0,
+    │   or it is a limit order priced at zero or below
     │
     ├── if Market order → set aggressive price (MAX/MIN)
     │
@@ -107,11 +113,11 @@ incoming order arrives
 
 ### MatchingEngine
 
-Top-level coordinator. Maintains a map of `OrderBook` instances keyed by symbol. Routes `OrderRequest` messages to the appropriate book. Auto-creates books for new symbols. Assigns sequential order IDs.
+Top-level coordinator. Maintains a map of `OrderBook` instances keyed by symbol. Runs each `OrderRequest` through `OrderValidator`, then routes it to the book for its symbol. A valid new order creates the book if needed; a cancel or modify for an unknown symbol does nothing. Assigns an order ID when the request carries 0, skipping any ID resting on that book. `last_error()` says why the last request had no effect.
 
 ### OrderBook
 
-Single-instrument order book. Contains bid side, ask side, and order lookup map. Implements the core matching algorithm: `add_order()`, `cancel_order()`, `modify_order()`.
+Single-instrument order book. Contains bid side, ask side, and order lookup map. Implements the core matching algorithm: `add_order()`, `cancel_order()`, `modify_order()`. `last_reject()` reports why a request was turned away, and `check_invariants()` walks the whole book to confirm it is consistent (used by the randomized test).
 
 ### BookSide
 
@@ -119,11 +125,11 @@ One half of the order book (bids or asks). Templated on comparator for sort orde
 
 ### PriceLevel
 
-FIFO queue of orders at a single price. Tracks aggregate quantity. Supports add, remove, and fill-front operations.
+FIFO queue of orders at a single price. Tracks aggregate quantity in 64 bits. Supports add, remove, reduce-in-place and fill-front operations.
 
 ### PoolAllocator
 
-Template memory pool that pre-allocates a fixed number of objects. Eliminates malloc/free from the hot path. Uses a free-list for O(1) allocate/deallocate.
+A standalone fixed-capacity pool with a free list for O(1) allocate and deallocate. **The order book does not use it**: the book's containers allocate from the heap. It hands out pre-built objects without running constructors or destructors, rejects a pointer from outside the pool, and rejects a double free. Making the book use a pool would mean a standard-conforming allocator for the list and tree nodes, which this class is not.
 
 ## Design Decisions
 
@@ -133,6 +139,7 @@ Template memory pool that pre-allocates a fixed number of objects. Eliminates ma
 | `std::map` over flat array | Handles sparse price levels efficiently |
 | `std::list` over `std::deque` | O(1) iterator-based removal for cancels |
 | Hash map for order lookup | O(1) cancel/modify by ID |
-| Header-heavy design | Enables inlining for hot-path methods |
+| Header-heavy design | Lets the compiler inline the small per-level methods |
 | Price-time priority | Industry standard; simplest fair matching |
-| Modify = cancel + re-add | Preserves order type, loses time priority (correct behavior) |
+| Modify = cancel + re-add, except a quantity reduction | A reduction gives nothing up, so it keeps its place; anything else re-queues |
+| No self-trade prevention | Orders have no owner field, so there is nothing to compare |

@@ -8,8 +8,8 @@ Before contributing, ensure you have the following installed:
 
 - **C++20-compatible compiler**: GCC 11+, Clang 14+, or MSVC 2022+
 - **CMake**: 3.20 or higher
-- **Google Test**: Fetched automatically via CMake `FetchContent`
-- **clang-format**: 14+ (for code formatting)
+- **Google Test**: installed on the system and found with `find_package(GTest)` (Debian/Ubuntu: `libgtest-dev`; macOS: `brew install googletest`)
+- **clang-format**: 18, the version CI checks with (other versions format a few lines differently)
 - **clang-tidy**: 14+ (for static analysis, optional but recommended)
 - **Doxygen**: 1.9+ (for documentation generation, optional)
 
@@ -54,10 +54,10 @@ This project uses `clang-format` to enforce a consistent code style. The configu
 
 ```bash
 # Format a single file
-clang-format -i src/engine/matching_engine.cpp
+clang-format -i src/book/order_book.cpp
 
 # Format all source files
-find include src tests -name '*.cpp' -o -name '*.hpp' | xargs clang-format -i
+find include src tests bench -name '*.cpp' -o -name '*.hpp' | xargs clang-format -i
 ```
 
 ### Style Summary
@@ -85,8 +85,7 @@ find src include -name '*.cpp' -o -name '*.hpp' | xargs clang-tidy -- -std=c++20
 ## Branching Model
 
 - **`main`**: Stable, production-ready code. All CI checks must pass before merging.
-- **`dev`**: Integration branch for ongoing development.
-- **Feature branches**: Branch from `dev` using the naming convention below.
+- **Feature branches**: Branch from `main` using the naming convention below.
 
 ### Branch Naming
 
@@ -100,12 +99,12 @@ find src include -name '*.cpp' -o -name '*.hpp' | xargs clang-tidy -- -std=c++20
 
 ## Pull Request Process
 
-1. **Create a branch** from `dev` following the naming conventions above.
+1. **Create a branch** from `main` following the naming conventions above.
 2. **Make focused changes**. Each PR should address a single concern.
 3. **Write or update tests** for any new or changed functionality.
 4. **Ensure all tests pass** locally before pushing.
 5. **Run clang-format** on all modified files.
-6. **Open a pull request** against `dev` using the PR template.
+6. **Open a pull request** against `main` using the PR template.
 7. **Respond to review feedback** promptly.
 8. **Squash commits** into logical units before merging (or request squash-merge).
 

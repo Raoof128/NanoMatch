@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(NanoMatch
     VERSION 1.0.0
-    DESCRIPTION "High-performance limit order book and matching engine"
+    DESCRIPTION "Limit order book and matching engine (a study project)"
     HOMEPAGE_URL "https://github.com/Raoof128/NanoMatch"
     LANGUAGES CXX
 )

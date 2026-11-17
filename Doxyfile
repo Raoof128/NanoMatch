@@ -1,6 +1,6 @@
 PROJECT_NAME           = "NanoMatch"
 PROJECT_NUMBER         = 1.0.0
-PROJECT_BRIEF          = "High-performance limit order book and matching engine"
+PROJECT_BRIEF          = "Limit order book and matching engine (a study project)"
 
 OUTPUT_DIRECTORY       = docs/api
 INPUT                  = include/nanomatch src

@@ -106,7 +106,8 @@ int main() {
     std::cout << std::string(88, '=') << "\n";
     bench::print_environment(std::cout);
     std::cout << "  Clock:       steady_clock; reading it twice in a row takes " << clock_cost
-              << " ns (median),\n               smallest step seen " << clock_tick << " ns\n";
+              << " ns (median),\n               smallest non-zero difference between two readings "
+              << clock_tick << " ns\n";
     std::cout << "  Operations:  " << kOperations << " (cancels that missed: " << cancel_misses
               << ")\n\n";
     std::cout << "  " << std::left << std::setw(24) << "Call (times in ns)" << std::right

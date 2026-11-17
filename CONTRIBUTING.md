@@ -6,7 +6,7 @@ Thank you for your interest in contributing to NanoMatch. This document provides
 
 Before contributing, ensure you have the following installed:
 
-- **C++20-compatible compiler**: GCC 11+, Clang 14+, or MSVC 2022+
+- **C++20-compatible compiler**: GCC or Clang (CI uses GCC 15.2 and Clang 21.1). The build flags are GCC/Clang ones; MSVC is not supported
 - **CMake**: 3.20 or higher
 - **Google Test**: installed on the system and found with `find_package(GTest)` (Debian/Ubuntu: `libgtest-dev`; macOS: `brew install googletest`)
 - **clang-format**: 18, the version CI checks with (other versions format a few lines differently)
@@ -84,7 +84,7 @@ find src include -name '*.cpp' -o -name '*.hpp' | xargs clang-tidy -- -std=c++20
 
 ## Branching Model
 
-- **`main`**: Stable, production-ready code. All CI checks must pass before merging.
+- **`main`**: The only long-lived branch. All CI checks must pass before merging.
 - **Feature branches**: Branch from `main` using the naming convention below.
 
 ### Branch Naming

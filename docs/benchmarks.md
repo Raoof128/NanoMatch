@@ -41,8 +41,8 @@ Replays 1,000,000 steps and times each call on its own with `steady_clock`, in t
 
 Two properties of the clock limit what these numbers can show, so the program measures and prints both:
 
-- **The cost of reading the clock** is inside every sample. It is about 20 ns on the CI runners and about 40 ns on an Apple M2.
-- **The clock's tick.** On Apple silicon `steady_clock` advances in steps of about 41.7 ns, so every sample is a multiple of that and percentiles land on 125, 167, 208 ns and so on. A p50 of "84 ns" on such a machine means "two ticks", not 84 ns.
+- **The cost of reading the clock** is inside every sample. It is about 20 ns on the CI runners. On an Apple M2 it is below the clock's step, so two readings in a row usually show a difference of 0.
+- **The clock's step.** The program prints the smallest non-zero difference between two consecutive readings. On Linux that is just the cost of a reading. On Apple silicon `steady_clock` advances in steps of about 41.7 ns, so every sample is a multiple of that and percentiles land on 125, 167, 208 ns and so on. A p50 of "84 ns" on such a machine means "two ticks", not 84 ns.
 
 The maximum is whatever the worst interruption was (a context switch, a page fault) and says little about the book.
 
@@ -54,5 +54,5 @@ Samples are written to `latency_histogram.csv` (`op,latency_ns`) for `scripts/pl
 
 ## Running them well
 
-- Release build, quiet machine. On a busy machine the throughput and the means collapse while the medians barely move.
+- Release build, quiet machine. On a busy laptop the same binary ran at a fifth to a third of its idle throughput, and the per-call medians roughly doubled.
 - Compare runs on the same machine and compiler. The CI figures come from shared virtual machines and move from run to run.

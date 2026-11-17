@@ -90,7 +90,7 @@ int run(int argc, char* argv[]) {
         }
     } else {
         // Interactive demo
-        std::cout << "NanoMatch — Low-Latency Matching Engine\n";
+        std::cout << "NanoMatch: limit order book and matching engine\n";
         std::cout << "Running demo with sample orders...\n\n";
 
         // Demo: place some orders

@@ -1,7 +1,9 @@
-#include <gtest/gtest.h>
 #include "nanomatch/stats/throughput_stats.hpp"
-#include <thread>
+
 #include <chrono>
+#include <thread>
+
+#include <gtest/gtest.h>
 
 using namespace nm;
 
@@ -9,8 +11,7 @@ TEST(ThroughputStatsTest, StartStopRecordsTiming) {
     ThroughputStats stats;
     stats.start();
     // Busy-wait a small amount to ensure measurable elapsed time
-    auto deadline = std::chrono::high_resolution_clock::now() +
-                    std::chrono::milliseconds(10);
+    auto deadline = std::chrono::high_resolution_clock::now() + std::chrono::milliseconds(10);
     while (std::chrono::high_resolution_clock::now() < deadline) {}
     stats.stop();
 
@@ -47,8 +48,7 @@ TEST(ThroughputStatsTest, OpsPerSecondCalculation) {
     }
 
     // Wait a small measurable time
-    auto deadline = std::chrono::high_resolution_clock::now() +
-                    std::chrono::milliseconds(10);
+    auto deadline = std::chrono::high_resolution_clock::now() + std::chrono::milliseconds(10);
     while (std::chrono::high_resolution_clock::now() < deadline) {}
     stats.stop();
 
@@ -65,8 +65,7 @@ TEST(ThroughputStatsTest, AvgLatencyCalculation) {
 
     stats.record_ops(100);
 
-    auto deadline = std::chrono::high_resolution_clock::now() +
-                    std::chrono::milliseconds(10);
+    auto deadline = std::chrono::high_resolution_clock::now() + std::chrono::milliseconds(10);
     while (std::chrono::high_resolution_clock::now() < deadline) {}
     stats.stop();
 

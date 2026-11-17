@@ -1,7 +1,7 @@
 #pragma once
-#include <vector>
 #include <cstddef>
 #include <stdexcept>
+#include <vector>
 
 namespace nm {
 
@@ -11,8 +11,7 @@ template <typename T>
 class PoolAllocator {
 public:
     /// Construct a pool with the given maximum capacity
-    explicit PoolAllocator(size_t capacity)
-        : pool_(capacity), free_list_(capacity) {
+    explicit PoolAllocator(size_t capacity) : pool_(capacity), free_list_(capacity) {
         // Initialise free list: every slot points to the next
         for (size_t i = 0; i < capacity; ++i) {
             free_list_[i] = i + 1;
@@ -47,16 +46,22 @@ public:
         --size_;
     }
 
-    [[nodiscard]] size_t size()     const { return size_; }
-    [[nodiscard]] size_t capacity() const { return capacity_; }
-    [[nodiscard]] bool   full()     const { return size_ >= capacity_; }
+    [[nodiscard]] size_t size() const {
+        return size_;
+    }
+    [[nodiscard]] size_t capacity() const {
+        return capacity_;
+    }
+    [[nodiscard]] bool full() const {
+        return size_ >= capacity_;
+    }
 
 private:
-    std::vector<T>      pool_;       // Pre-allocated storage
+    std::vector<T> pool_;            // Pre-allocated storage
     std::vector<size_t> free_list_;  // Free list (index -> next free index)
-    size_t              free_head_;  // Index of first free slot
-    size_t              size_;
-    size_t              capacity_;
+    size_t free_head_;               // Index of first free slot
+    size_t size_;
+    size_t capacity_;
 };
 
-} // namespace nm
+}  // namespace nm

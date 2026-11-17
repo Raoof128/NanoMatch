@@ -1,19 +1,20 @@
 #pragma once
-#include "nanomatch/core/types.hpp"
-#include "nanomatch/core/side.hpp"
 #include "nanomatch/core/order_type.hpp"
+#include "nanomatch/core/side.hpp"
+#include "nanomatch/core/types.hpp"
+
 #include <chrono>
 
 namespace nm {
 
 /// Represents a single order in the matching engine, including its fill state.
 struct Order {
-    OrderID   id;
-    Side      side;
+    OrderID id;
+    Side side;
     OrderType type;
-    Price     price;            // 0 for market orders
-    Quantity  initial_quantity;
-    Quantity  remaining_quantity;
+    Price price;  // 0 for market orders
+    Quantity initial_quantity;
+    Quantity remaining_quantity;
     std::chrono::steady_clock::time_point timestamp;
 
     /// Returns true if the order has been completely filled
@@ -41,12 +42,12 @@ struct Order {
 struct OrderRequest {
     enum class Action : uint8_t { New, Cancel, Modify };
 
-    Action    action;
-    OrderID   id;
-    Side      side;
+    Action action;
+    OrderID id;
+    Side side;
     OrderType type;
-    Price     price;
-    Quantity  quantity;
+    Price price;
+    Quantity quantity;
 };
 
-} // namespace nm
+}  // namespace nm

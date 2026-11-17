@@ -1,6 +1,7 @@
 #include "nanomatch/book/order_book.hpp"
-#include <iostream>
+
 #include <iomanip>
+#include <iostream>
 
 namespace nm {
 
@@ -57,39 +58,39 @@ std::vector<Trade> OrderBook::match_order(Order& incoming) {
     while (!incoming.is_filled()) {
         // Get the opposite side
         auto best = is_buy ? asks_.best_price() : bids_.best_price();
-        if (!best) break;
+        if (!best)
+            break;
 
         Price best_opposing = *best;
 
         // Check if prices cross
-        bool crosses = is_buy
-            ? (incoming.price >= best_opposing)
-            : (incoming.price <= best_opposing);
+        bool crosses =
+            is_buy ? (incoming.price >= best_opposing) : (incoming.price <= best_opposing);
 
-        if (!crosses) break;  // No more matchable prices
+        if (!crosses)
+            break;  // No more matchable prices
 
         // Match against the front order at this price level
         auto& level = is_buy ? asks_.best_level() : bids_.best_level();
         Order& resting = level.front();
 
         // Trade quantity = min of both remaining quantities
-        Quantity trade_qty = std::min(incoming.remaining_quantity,
-                                      resting.remaining_quantity);
+        Quantity trade_qty = std::min(incoming.remaining_quantity, resting.remaining_quantity);
 
         // Trade price = resting order's price (price improvement for aggressor)
         Price trade_price = resting.price;
 
         // Record the trade
         Trade trade;
-        trade.price     = trade_price;
-        trade.quantity   = trade_qty;
-        trade.timestamp  = std::chrono::steady_clock::now();
+        trade.price = trade_price;
+        trade.quantity = trade_qty;
+        trade.timestamp = std::chrono::steady_clock::now();
 
         if (incoming.side == Side::Buy) {
-            trade.buy_order_id  = incoming.id;
+            trade.buy_order_id = incoming.id;
             trade.sell_order_id = resting.id;
         } else {
-            trade.buy_order_id  = resting.id;
+            trade.buy_order_id = resting.id;
             trade.sell_order_id = incoming.id;
         }
 
@@ -129,17 +130,21 @@ bool OrderBook::can_fill_completely(const Order& order) const {
     if (order.side == Side::Buy) {
         // Check ask side
         for (const auto& [price, level] : asks_) {
-            if (order.price < price) break;  // Can't match beyond this
+            if (order.price < price)
+                break;  // Can't match beyond this
             Quantity available = level.total_quantity();
-            if (available >= remaining) return true;
+            if (available >= remaining)
+                return true;
             remaining -= available;
         }
     } else {
         // Check bid side
         for (const auto& [price, level] : bids_) {
-            if (order.price > price) break;
+            if (order.price > price)
+                break;
             Quantity available = level.total_quantity();
-            if (available >= remaining) return true;
+            if (available >= remaining)
+                return true;
             remaining -= available;
         }
     }
@@ -149,7 +154,8 @@ bool OrderBook::can_fill_completely(const Order& order) const {
 
 bool OrderBook::cancel_order(OrderID id) {
     auto it = order_lookup_.find(id);
-    if (it == order_lookup_.end()) return false;
+    if (it == order_lookup_.end())
+        return false;
 
     auto& loc = it->second;
     if (loc.side == Side::Buy) {
@@ -162,10 +168,10 @@ bool OrderBook::cancel_order(OrderID id) {
     return true;
 }
 
-std::vector<Trade> OrderBook::modify_order(OrderID id, Price new_price,
-                                            Quantity new_qty) {
+std::vector<Trade> OrderBook::modify_order(OrderID id, Price new_price, Quantity new_qty) {
     auto it = order_lookup_.find(id);
-    if (it == order_lookup_.end()) return {};
+    if (it == order_lookup_.end())
+        return {};
 
     // Save order details before cancellation invalidates the iterator
     Side side = it->second.side;
@@ -176,11 +182,11 @@ std::vector<Trade> OrderBook::modify_order(OrderID id, Price new_price,
 
     // Re-add with new price/quantity (keeps same ID and original type)
     Order new_order;
-    new_order.id                = id;
-    new_order.side              = side;
-    new_order.type              = type;
-    new_order.price             = new_price;
-    new_order.initial_quantity  = new_qty;
+    new_order.id = id;
+    new_order.side = side;
+    new_order.type = type;
+    new_order.price = new_price;
+    new_order.initial_quantity = new_qty;
     new_order.remaining_quantity = new_qty;
 
     return add_order(std::move(new_order));
@@ -198,7 +204,7 @@ void OrderBook::place_on_book(Order order) {
         iter = asks_.add_order(std::move(order));
     }
 
-    order_lookup_[id] = OrderLocation{ price, side, iter };
+    order_lookup_[id] = OrderLocation{price, side, iter};
 }
 
 void OrderBook::print_book(size_t depth) const {
@@ -208,14 +214,15 @@ void OrderBook::print_book(size_t depth) const {
     std::vector<std::pair<Price, Quantity>> ask_display;
     size_t count = 0;
     for (const auto& [price, level] : asks_) {
-        if (count++ >= depth) break;
+        if (count++ >= depth)
+            break;
         ask_display.emplace_back(price, level.total_quantity());
     }
 
     std::cout << "  ASKS:\n";
     for (auto it = ask_display.rbegin(); it != ask_display.rend(); ++it) {
-        std::cout << "    " << std::setw(10) << price_to_string(it->first)
-                  << "  x " << it->second << "\n";
+        std::cout << "    " << std::setw(10) << price_to_string(it->first) << "  x " << it->second
+                  << "\n";
     }
 
     // Spread
@@ -226,13 +233,14 @@ void OrderBook::print_book(size_t depth) const {
     std::cout << "  BIDS:\n";
     count = 0;
     for (const auto& [price, level] : bids_) {
-        if (count++ >= depth) break;
-        std::cout << "    " << std::setw(10) << price_to_string(price)
-                  << "  x " << level.total_quantity() << "\n";
+        if (count++ >= depth)
+            break;
+        std::cout << "    " << std::setw(10) << price_to_string(price) << "  x "
+                  << level.total_quantity() << "\n";
     }
 
     std::cout << "  Total orders: " << total_orders() << "\n";
     std::cout << "================================\n\n";
 }
 
-} // namespace nm
+}  // namespace nm

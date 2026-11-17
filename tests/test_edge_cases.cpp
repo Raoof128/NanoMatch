@@ -1,7 +1,8 @@
-#include <gtest/gtest.h>
 #include "nanomatch/book/order_book.hpp"
 #include "nanomatch/engine/matching_engine.hpp"
 #include "nanomatch/engine/order_validator.hpp"
+
+#include <gtest/gtest.h>
 
 using namespace nm;
 
@@ -10,14 +11,13 @@ protected:
     OrderBook book{"EDGE"};
     OrderID next_id = 1;
 
-    Order make_order(Side side, Price price, Quantity qty,
-                     OrderType type = OrderType::Limit) {
+    Order make_order(Side side, Price price, Quantity qty, OrderType type = OrderType::Limit) {
         Order o;
-        o.id                = next_id++;
-        o.side              = side;
-        o.type              = type;
-        o.price             = price;
-        o.initial_quantity  = qty;
+        o.id = next_id++;
+        o.side = side;
+        o.type = type;
+        o.price = price;
+        o.initial_quantity = qty;
         o.remaining_quantity = qty;
         return o;
     }
@@ -86,12 +86,10 @@ TEST_F(EdgeCaseTest, EmptyBookOperations) {
 TEST(MatchingEngineTest, MultiSymbol) {
     MatchingEngine engine;
 
-    OrderRequest req1{OrderRequest::Action::New, 0, Side::Buy,
-                      OrderType::Limit, 10000, 100};
+    OrderRequest req1{OrderRequest::Action::New, 0, Side::Buy, OrderType::Limit, 10000, 100};
     engine.process("AAPL", req1);
 
-    OrderRequest req2{OrderRequest::Action::New, 0, Side::Sell,
-                      OrderType::Limit, 20000, 100};
+    OrderRequest req2{OrderRequest::Action::New, 0, Side::Sell, OrderType::Limit, 20000, 100};
     engine.process("GOOG", req2);
 
     EXPECT_EQ(engine.book_count(), 2u);
@@ -104,7 +102,7 @@ TEST(MatchingEngineTest, AutoAssignsID) {
     MatchingEngine engine;
 
     OrderRequest req{OrderRequest::Action::New, INVALID_ID, Side::Buy,
-                     OrderType::Limit, 10000, 100};
+                     OrderType::Limit,          10000,      100};
     engine.process("AAPL", req);
 
     auto* book = engine.get_book("AAPL");
@@ -114,29 +112,25 @@ TEST(MatchingEngineTest, AutoAssignsID) {
 
 // Validator tests
 TEST(ValidatorTest, RejectsZeroQuantity) {
-    OrderRequest req{OrderRequest::Action::New, 0, Side::Buy,
-                     OrderType::Limit, 10000, 0};
+    OrderRequest req{OrderRequest::Action::New, 0, Side::Buy, OrderType::Limit, 10000, 0};
     auto result = OrderValidator::validate(req);
     EXPECT_FALSE(result.valid);
 }
 
 TEST(ValidatorTest, RejectsNegativePrice) {
-    OrderRequest req{OrderRequest::Action::New, 0, Side::Buy,
-                     OrderType::Limit, -100, 100};
+    OrderRequest req{OrderRequest::Action::New, 0, Side::Buy, OrderType::Limit, -100, 100};
     auto result = OrderValidator::validate(req);
     EXPECT_FALSE(result.valid);
 }
 
 TEST(ValidatorTest, AcceptsValidOrder) {
-    OrderRequest req{OrderRequest::Action::New, 0, Side::Buy,
-                     OrderType::Limit, 10000, 100};
+    OrderRequest req{OrderRequest::Action::New, 0, Side::Buy, OrderType::Limit, 10000, 100};
     auto result = OrderValidator::validate(req);
     EXPECT_TRUE(result.valid);
 }
 
 TEST(ValidatorTest, RejectsCancelWithInvalidID) {
-    OrderRequest req{OrderRequest::Action::Cancel, INVALID_ID, Side::Buy,
-                     OrderType::Limit, 0, 0};
+    OrderRequest req{OrderRequest::Action::Cancel, INVALID_ID, Side::Buy, OrderType::Limit, 0, 0};
     auto result = OrderValidator::validate(req);
     EXPECT_FALSE(result.valid);
 }

@@ -1,5 +1,6 @@
-#include <gtest/gtest.h>
 #include "nanomatch/book/order_book.hpp"
+
+#include <gtest/gtest.h>
 
 using namespace nm;
 
@@ -8,14 +9,13 @@ protected:
     OrderBook book{"AAPL"};
     OrderID next_id = 1;
 
-    Order make_order(Side side, Price price, Quantity qty,
-                     OrderType type = OrderType::Limit) {
+    Order make_order(Side side, Price price, Quantity qty, OrderType type = OrderType::Limit) {
         Order o;
-        o.id                = next_id++;
-        o.side              = side;
-        o.type              = type;
-        o.price             = price;
-        o.initial_quantity  = qty;
+        o.id = next_id++;
+        o.side = side;
+        o.type = type;
+        o.price = price;
+        o.initial_quantity = qty;
         o.remaining_quantity = qty;
         return o;
     }
@@ -88,7 +88,7 @@ TEST_F(MatchingLimitTest, MultipleFillsAcrossLevels) {
 }
 
 TEST_F(MatchingLimitTest, NoMatchWhenPricesDontCross) {
-    book.add_order(make_order(Side::Sell, 10200, 100));  // Ask at $102
+    book.add_order(make_order(Side::Sell, 10200, 100));               // Ask at $102
     auto trades = book.add_order(make_order(Side::Buy, 10100, 100));  // Bid at $101
 
     EXPECT_TRUE(trades.empty());

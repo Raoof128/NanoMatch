@@ -1,8 +1,9 @@
-#include "nanomatch/memory/pool_allocator.hpp"
 #include "nanomatch/core/order.hpp"
+#include "nanomatch/memory/pool_allocator.hpp"
+
 #include <chrono>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 #include <vector>
 
 using namespace nm;
@@ -27,7 +28,8 @@ int main() {
         // Allocate
         for (size_t i = 0; i < NUM_OPS; ++i) {
             Order* ptr = pool.allocate();
-            if (ptr) allocated.push_back(ptr);
+            if (ptr)
+                allocated.push_back(ptr);
         }
 
         // Deallocate half
@@ -41,18 +43,18 @@ int main() {
         }
 
         auto end = std::chrono::high_resolution_clock::now();
-        auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
-            end - start).count();
+        auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
 
         double total_ops = NUM_OPS + NUM_OPS;  // alloc + dealloc/realloc
         double avg_ns = elapsed_ns / total_ops;
 
         std::cout << "  Pool allocator:\n";
         std::cout << "    Pool size:     " << std::setw(10) << POOL_SIZE << " objects\n";
-        std::cout << "    Operations:    " << std::setw(10) << static_cast<uint64_t>(total_ops) << "\n";
+        std::cout << "    Operations:    " << std::setw(10) << static_cast<uint64_t>(total_ops)
+                  << "\n";
         std::cout << "    Total time:    " << std::setw(10) << elapsed_ns / 1000 << " us\n";
-        std::cout << "    Avg per op:    " << std::setw(10) << std::fixed
-                  << std::setprecision(1) << avg_ns << " ns\n";
+        std::cout << "    Avg per op:    " << std::setw(10) << std::fixed << std::setprecision(1)
+                  << avg_ns << " ns\n";
         std::cout << "    Order size:    " << std::setw(10) << sizeof(Order) << " bytes\n";
         std::cout << "    Pool memory:   " << std::setw(10)
                   << (POOL_SIZE * sizeof(Order)) / (1024 * 1024) << " MB\n";
@@ -78,17 +80,17 @@ int main() {
         }
 
         auto end = std::chrono::high_resolution_clock::now();
-        auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
-            end - start).count();
+        auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
 
         double total_ops = NUM_OPS + NUM_OPS;
         double avg_ns = elapsed_ns / total_ops;
 
         std::cout << "\n  Standard new/delete:\n";
-        std::cout << "    Operations:    " << std::setw(10) << static_cast<uint64_t>(total_ops) << "\n";
+        std::cout << "    Operations:    " << std::setw(10) << static_cast<uint64_t>(total_ops)
+                  << "\n";
         std::cout << "    Total time:    " << std::setw(10) << elapsed_ns / 1000 << " us\n";
-        std::cout << "    Avg per op:    " << std::setw(10) << std::fixed
-                  << std::setprecision(1) << avg_ns << " ns\n";
+        std::cout << "    Avg per op:    " << std::setw(10) << std::fixed << std::setprecision(1)
+                  << avg_ns << " ns\n";
 
         // Clean up remaining
         for (size_t i = allocated.size() / 2; i < allocated.size(); ++i) {

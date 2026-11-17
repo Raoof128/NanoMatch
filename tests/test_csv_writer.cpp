@@ -1,8 +1,10 @@
-#include <gtest/gtest.h>
 #include "nanomatch/io/csv_writer.hpp"
+
+#include <cstdio>
 #include <fstream>
 #include <sstream>
-#include <cstdio>
+
+#include <gtest/gtest.h>
 
 using namespace nm;
 
@@ -11,11 +13,10 @@ protected:
     std::string tmp_path_;
 
     void SetUp() override {
-        tmp_path_ = "/tmp/nanomatch_test_csv_writer_" +
-                    std::to_string(::testing::UnitTest::GetInstance()
-                                       ->current_test_info()
-                                       ->line()) +
-                    ".csv";
+        tmp_path_ =
+            "/tmp/nanomatch_test_csv_writer_" +
+            std::to_string(::testing::UnitTest::GetInstance()->current_test_info()->line()) +
+            ".csv";
     }
 
     void TearDown() override {
@@ -63,8 +64,7 @@ TEST_F(CSVWriterTest, HeaderIsCorrect) {
     writer.write_trades(trades);
 
     std::string content = read_file();
-    EXPECT_EQ(content.substr(0, content.find('\n')),
-              "buy_order_id,sell_order_id,price,quantity");
+    EXPECT_EQ(content.substr(0, content.find('\n')), "buy_order_id,sell_order_id,price,quantity");
 }
 
 TEST_F(CSVWriterTest, AppendModeAddsWithoutHeader) {

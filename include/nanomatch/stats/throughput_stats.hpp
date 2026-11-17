@@ -24,8 +24,8 @@ public:
     }
 
     [[nodiscard]] double elapsed_seconds() const {
-        auto elapsed_us = std::chrono::duration_cast<std::chrono::microseconds>(
-            end_ - start_).count();
+        auto elapsed_us =
+            std::chrono::duration_cast<std::chrono::microseconds>(end_ - start_).count();
         return elapsed_us / 1'000'000.0;
     }
 
@@ -35,12 +35,14 @@ public:
     }
 
     [[nodiscard]] double avg_latency_ns() const {
-        double elapsed_us = std::chrono::duration_cast<std::chrono::microseconds>(
-            end_ - start_).count();
+        double elapsed_us =
+            std::chrono::duration_cast<std::chrono::microseconds>(end_ - start_).count();
         return (ops_ > 0) ? (elapsed_us * 1000.0) / ops_ : 0.0;
     }
 
-    [[nodiscard]] uint64_t total_ops() const { return ops_; }
+    [[nodiscard]] uint64_t total_ops() const {
+        return ops_;
+    }
 
 private:
     std::chrono::high_resolution_clock::time_point start_;
@@ -48,4 +50,4 @@ private:
     uint64_t ops_ = 0;
 };
 
-} // namespace nm
+}  // namespace nm

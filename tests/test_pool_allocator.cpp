@@ -1,6 +1,7 @@
-#include <gtest/gtest.h>
-#include "nanomatch/memory/pool_allocator.hpp"
 #include "nanomatch/core/order.hpp"
+#include "nanomatch/memory/pool_allocator.hpp"
+
+#include <gtest/gtest.h>
 
 using namespace nm;
 
@@ -74,7 +75,9 @@ TEST(PoolAllocatorTest, DeallocateAndReuse) {
     int* b = pool.allocate();
     int* c = pool.allocate();
 
-    *a = 1; *b = 2; *c = 3;
+    *a = 1;
+    *b = 2;
+    *c = 3;
 
     // Free b
     pool.deallocate(b);

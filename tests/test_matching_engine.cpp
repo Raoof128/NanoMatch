@@ -1,5 +1,6 @@
-#include <gtest/gtest.h>
 #include "nanomatch/engine/matching_engine.hpp"
+
+#include <gtest/gtest.h>
 
 using namespace nm;
 
@@ -10,7 +11,7 @@ protected:
     OrderRequest new_order(Side side, Price price, Quantity qty) {
         OrderRequest req{};
         req.action = OrderRequest::Action::New;
-        req.id = INVALID_ID; // let engine auto-assign
+        req.id = INVALID_ID;  // let engine auto-assign
         req.side = side;
         req.type = OrderType::Limit;
         req.price = price;

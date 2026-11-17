@@ -1,3 +1,10 @@
+// PoolAllocator against new/delete, on its own.
+//
+// The order book does not use PoolAllocator, so this says nothing about matching speed.
+// The two sides are also not doing the same work: the pool builds all of its objects
+// before the timed section starts (that cost is printed separately), while new/delete
+// pays for construction inside it.
+
 #include "nanomatch/core/order.hpp"
 #include "nanomatch/memory/pool_allocator.hpp"
 
@@ -6,99 +13,99 @@
 #include <iostream>
 #include <vector>
 
+#include "bench_common.hpp"
+
 using namespace nm;
 
+namespace {
+
+using Clock = std::chrono::steady_clock;
+
+double microseconds(Clock::time_point from, Clock::time_point to) {
+    return std::chrono::duration<double, std::micro>(to - from).count();
+}
+
+}  // namespace
+
 int main() {
-    constexpr size_t POOL_SIZE = 1'000'000;
-    constexpr size_t NUM_OPS = 500'000;
+    constexpr size_t kPoolSize = 1'000'000;
+    constexpr size_t kObjects = 500'000;
+    const double total_ops = static_cast<double>(kObjects) * 2.0;  // allocate, free half, refill
 
-    std::cout << std::string(45, '=') << "\n";
-    std::cout << "      NanoMatch Memory Pool Benchmark\n";
-    std::cout << std::string(45, '=') << "\n";
+    std::cout << std::string(52, '=') << "\n";
+    std::cout << "  NanoMatch pool allocator benchmark (standalone)\n";
+    std::cout << std::string(52, '=') << "\n";
+    bench::print_environment(std::cout);
+    std::cout << std::fixed << std::setprecision(1);
 
-    // Benchmark pool allocator
     {
-        PoolAllocator<Order> pool(POOL_SIZE);
-
-        auto start = std::chrono::high_resolution_clock::now();
+        const auto build_start = Clock::now();
+        PoolAllocator<Order> pool(kPoolSize);
+        const auto start = Clock::now();
 
         std::vector<Order*> allocated;
-        allocated.reserve(NUM_OPS);
+        allocated.reserve(kObjects);
 
-        // Allocate
-        for (size_t i = 0; i < NUM_OPS; ++i) {
+        for (size_t i = 0; i < kObjects; ++i) {
             Order* ptr = pool.allocate();
             if (ptr)
                 allocated.push_back(ptr);
         }
-
-        // Deallocate half
         for (size_t i = 0; i < allocated.size() / 2; ++i) {
             pool.deallocate(allocated[i]);
         }
-
-        // Reallocate
         for (size_t i = 0; i < allocated.size() / 2; ++i) {
-            pool.allocate();
+            allocated[i] = pool.allocate();
         }
 
-        auto end = std::chrono::high_resolution_clock::now();
-        auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+        const auto end = Clock::now();
+        const double elapsed_us = microseconds(start, end);
 
-        double total_ops = NUM_OPS + NUM_OPS;  // alloc + dealloc/realloc
-        double avg_ns = elapsed_ns / total_ops;
-
-        std::cout << "  Pool allocator:\n";
-        std::cout << "    Pool size:     " << std::setw(10) << POOL_SIZE << " objects\n";
-        std::cout << "    Operations:    " << std::setw(10) << static_cast<uint64_t>(total_ops)
+        std::cout << "\n  Pool allocator:\n";
+        std::cout << "    Building the pool: " << std::setw(10) << microseconds(build_start, start)
+                  << " us (" << kPoolSize << " objects, "
+                  << (kPoolSize * sizeof(Order)) / (1024 * 1024)
+                  << " MB, not in the figure below)\n";
+        std::cout << "    Operations:        " << std::setw(10) << static_cast<uint64_t>(total_ops)
                   << "\n";
-        std::cout << "    Total time:    " << std::setw(10) << elapsed_ns / 1000 << " us\n";
-        std::cout << "    Avg per op:    " << std::setw(10) << std::fixed << std::setprecision(1)
-                  << avg_ns << " ns\n";
-        std::cout << "    Order size:    " << std::setw(10) << sizeof(Order) << " bytes\n";
-        std::cout << "    Pool memory:   " << std::setw(10)
-                  << (POOL_SIZE * sizeof(Order)) / (1024 * 1024) << " MB\n";
+        std::cout << "    Total time:        " << std::setw(10) << elapsed_us << " us\n";
+        std::cout << "    Mean per op:       " << std::setw(10) << elapsed_us * 1000.0 / total_ops
+                  << " ns\n";
     }
 
-    // Benchmark new/delete for comparison
     {
-        auto start = std::chrono::high_resolution_clock::now();
+        const auto start = Clock::now();
 
         std::vector<Order*> allocated;
-        allocated.reserve(NUM_OPS);
+        allocated.reserve(kObjects);
 
-        for (size_t i = 0; i < NUM_OPS; ++i) {
+        for (size_t i = 0; i < kObjects; ++i) {
             allocated.push_back(new Order{});
         }
-
         for (size_t i = 0; i < allocated.size() / 2; ++i) {
             delete allocated[i];
         }
-
         for (size_t i = 0; i < allocated.size() / 2; ++i) {
             allocated[i] = new Order{};
         }
 
-        auto end = std::chrono::high_resolution_clock::now();
-        auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+        const auto end = Clock::now();
+        const double elapsed_us = microseconds(start, end);
 
-        double total_ops = NUM_OPS + NUM_OPS;
-        double avg_ns = elapsed_ns / total_ops;
-
-        std::cout << "\n  Standard new/delete:\n";
-        std::cout << "    Operations:    " << std::setw(10) << static_cast<uint64_t>(total_ops)
+        std::cout << "\n  new/delete:\n";
+        std::cout << "    Operations:        " << std::setw(10) << static_cast<uint64_t>(total_ops)
                   << "\n";
-        std::cout << "    Total time:    " << std::setw(10) << elapsed_ns / 1000 << " us\n";
-        std::cout << "    Avg per op:    " << std::setw(10) << std::fixed << std::setprecision(1)
-                  << avg_ns << " ns\n";
+        std::cout << "    Total time:        " << std::setw(10) << elapsed_us << " us\n";
+        std::cout << "    Mean per op:       " << std::setw(10) << elapsed_us * 1000.0 / total_ops
+                  << " ns\n";
 
-        // Clean up remaining
-        for (size_t i = allocated.size() / 2; i < allocated.size(); ++i) {
-            delete allocated[i];
+        for (Order* ptr : allocated) {
+            delete ptr;
         }
     }
 
-    std::cout << std::string(45, '=') << "\n";
+    std::cout << "\n  Order size: " << sizeof(Order) << " bytes\n";
+    std::cout << std::string(52, '=') << "\n";
 
     return 0;
 }

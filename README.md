@@ -7,7 +7,7 @@
 
 **High-performance limit order book and matching engine built in modern C++20.**
 
-NanoMatch simulates the core of a financial exchange — processing buy/sell orders using price-time priority, matching trades, and benchmarking throughput at millions of operations per second. It demonstrates the same data structures and algorithms used by major electronic exchanges and trading firms.
+NanoMatch simulates the core of a financial exchange — processing buy/sell orders using price-time priority, matching trades, and benchmarking throughput at millions of operations per second. It is a study implementation of the textbook design: a price-ordered `std::map` of FIFO queues, with a hash map for order lookup.
 
 ## Performance
 
@@ -21,7 +21,9 @@ NanoMatch simulates the core of a financial exchange — processing buy/sell ord
 =========================================            =========================================
 ```
 
-> Benchmarked on Apple M-series, Release build (`-O3 -march=native`). Results are reproducible via fixed seed.
+> Recorded once on an Apple M-series laptop: Release build (`-O3 -march=native`), single thread, synthetic orders from a fixed seed. The seed fixes the inputs, not the timings, which vary by machine and by run.
+>
+> What each number covers. The throughput run is about 80% adds and 20% cancel attempts; a cancel aimed at an order that has already been removed returns at once, so it is cheaper than a real cancel. The latency run times add-order calls only and includes the timer's own overhead. CI prints both benchmarks on every run.
 
 ## Features
 
@@ -29,8 +31,8 @@ NanoMatch simulates the core of a financial exchange — processing buy/sell ord
 - **Four order types** — Limit, Market, Immediate-or-Cancel (IOC), Fill-or-Kill (FOK)
 - **Cancel and modify** — O(1) lookup by order ID via hash map
 - **Multi-instrument** — independent order books per symbol via `MatchingEngine`
-- **Custom pool allocator** — eliminates heap allocation on the hot path
-- **Comprehensive testing** — 60+ Google Test cases across 18 test suites
+- **Custom pool allocator** — a standalone fixed-size pool, tested and benchmarked against `new`/`delete`. The order book does not use it yet; it allocates through `std::map`, `std::list` and `std::unordered_map`
+- **Testing** — 137 Google Test cases across 18 test files, run under AddressSanitizer and UndefinedBehaviorSanitizer in CI
 - **Latency benchmarks** — p50/p99/p99.9 percentile histograms
 - **CSV I/O** — read orders from CSV, write trade reports
 - **CI/CD** — GitHub Actions with matrix builds, sanitizers, static analysis, format checks

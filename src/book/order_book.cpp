@@ -157,7 +157,7 @@ bool OrderBook::cancel_order(OrderID id) {
     if (it == order_lookup_.end())
         return false;
 
-    auto& loc = it->second;
+    const auto& loc = it->second;
     if (loc.side == Side::Buy) {
         bids_.remove_order(loc.price, loc.iterator);
     } else {

@@ -17,6 +17,7 @@ void print_usage() {
               << "  --help           Show this help\n";
 }
 
+// cppcheck-suppress constParameter ; main's signature is fixed by the standard
 int main(int argc, char* argv[]) {
     std::string symbol = "AAPL";
     std::string csv_file;
@@ -48,9 +49,9 @@ int main(int argc, char* argv[]) {
         auto requests = reader.read_orders();
         std::cout << "Processing " << requests.size() << " orders from " << csv_file << "\n";
 
-        for (auto& req : requests) {
+        for (const auto& req : requests) {
             auto trades = engine.process(symbol, req);
-            for (auto& t : trades) {
+            for (const auto& t : trades) {
                 all_trades.push_back(t);
                 if (verbose) {
                     std::cout << "TRADE: " << t.buy_order_id << " x " << t.sell_order_id << " @ "
@@ -58,7 +59,7 @@ int main(int argc, char* argv[]) {
                 }
             }
             if (verbose) {
-                auto* book = engine.get_book(symbol);
+                const auto* book = engine.get_book(symbol);
                 if (book)
                     book->print_book(3);
             }
@@ -71,9 +72,7 @@ int main(int argc, char* argv[]) {
         for (uint32_t i = 0; i < generate_count; ++i) {
             auto req = gen.generate();
             auto trades = engine.process(symbol, req);
-            for (auto& t : trades) {
-                all_trades.push_back(t);
-            }
+            all_trades.insert(all_trades.end(), trades.begin(), trades.end());
         }
     } else {
         // Interactive demo
@@ -81,9 +80,9 @@ int main(int argc, char* argv[]) {
         std::cout << "Running demo with sample orders...\n\n";
 
         // Demo: place some orders
-        auto process_and_report = [&](OrderRequest req) {
+        auto process_and_report = [&](const OrderRequest& req) {
             auto trades = engine.process(symbol, req);
-            for (auto& t : trades) {
+            for (const auto& t : trades) {
                 all_trades.push_back(t);
                 std::cout << "  TRADE: Buy#" << t.buy_order_id << " x Sell#" << t.sell_order_id
                           << " @ " << price_to_string(t.price) << " x " << t.quantity
@@ -103,7 +102,7 @@ int main(int argc, char* argv[]) {
         process_and_report({OrderRequest::Action::New, 0, Side::Buy, OrderType::Limit, 10100, 800});
         process_and_report({OrderRequest::Action::New, 0, Side::Buy, OrderType::Limit, 10075, 600});
 
-        auto* book = engine.get_book(symbol);
+        const auto* book = engine.get_book(symbol);
         if (book)
             book->print_book();
 
@@ -118,7 +117,7 @@ int main(int argc, char* argv[]) {
     // Summary
     std::cout << "\nTotal trades executed: " << all_trades.size() << "\n";
 
-    auto* book = engine.get_book(symbol);
+    const auto* book = engine.get_book(symbol);
     if (book) {
         std::cout << "Remaining orders on book: " << book->total_orders() << "\n";
         auto bid = book->best_bid();

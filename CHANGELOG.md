@@ -4,6 +4,13 @@ All notable changes to NanoMatch are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **CI, Format Check**: Ran `clang-format` 18 with the repository `.clang-format` over `include/`, `src/`, `tests/` and `bench/`. Formatting only.
+- **CI, Static Analysis**: Resolved the cppcheck findings in `src/main.cpp` and `src/book/order_book.cpp`: read-only references, pointers and the demo lambda parameter are now `const`, and a raw copy loop uses `std::vector::insert`. `main`'s `argv` keeps its standard signature under an inline suppression. No behaviour change; 18/18 test suites pass.
+
 ## [1.0.0] - 2026-03-21
 
 ### Added
